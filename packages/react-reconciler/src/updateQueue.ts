@@ -30,6 +30,7 @@ export const createUpdate = <State>(action: Action<State>): Update<State> => {
  * 创建更新队列
  */
 export const createUpdateQueue = <Action>(): UpdateQueue<Action> => {
+	// 这样设计， 可以在 wip 和 current 中公用一个 updateQueue
 	return {
 		shared: {
 			pending: null
@@ -58,7 +59,7 @@ export const enqueueUpdate = <Action>(
 export const processUpdateQueue = <State>(
 	baseState: State,
 	pendingUpdate: Update<State> | null
-): { memoizedState: State } => {
+): { /** 更新完成以后，新的 state */ memoizedState: State } => {
 	const result: ReturnType<typeof processUpdateQueue<State>> = {
 		memoizedState: baseState
 	};
