@@ -11,6 +11,7 @@ export interface Update<State> {
  * 消费 update 的数据结构
  */
 export interface UpdateQueue<State> {
+	// 为了在 wip 中共用 updateQueue
 	shared: {
 		pending: Update<State> | null;
 	};
@@ -29,7 +30,7 @@ export const createUpdate = <State>(action: Action<State>): Update<State> => {
 /**
  * 创建更新队列
  */
-export const createUpdateQueue = <Action>(): UpdateQueue<Action> => {
+export const createUpdateQueue = <State>(): UpdateQueue<State> => {
 	// 这样设计， 可以在 wip 和 current 中公用一个 updateQueue
 	return {
 		shared: {
@@ -43,9 +44,9 @@ export const createUpdateQueue = <Action>(): UpdateQueue<Action> => {
  * @param updateQueue 更新队列
  * @param update 更新实例
  */
-export const enqueueUpdate = <Action>(
-	updateQueue: UpdateQueue<Action>,
-	update: Update<Action>
+export const enqueueUpdate = <State>(
+	updateQueue: UpdateQueue<State>,
+	update: Update<State>
 ) => {
 	updateQueue.shared.pending = update;
 };

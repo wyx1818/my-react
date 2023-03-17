@@ -8,6 +8,7 @@ let workInProgress: FiberNode | null = null;
 
 // 初始化
 function prepareRefreshStack(root: FiberRootNode) {
+	// FiberRootNode 不是一个普通的fiber，不能直接拿来做 workInProgress
 	workInProgress = creatWorkInProgress(root.current, {});
 }
 
@@ -30,6 +31,7 @@ function markUpdateFromFiberToRoot(fiber: FiberNode) {
 		parent = node.return;
 	}
 
+	// 遍历到根fiber后
 	if (node.tag === HostRoot) {
 		return node.stateNode;
 	}
@@ -46,7 +48,9 @@ function renderRoot(root: FiberRootNode) {
 			workLoop();
 			break;
 		} catch (e) {
-			console.warn('workLoop 发生错误', e);
+			if (__DEV__) {
+				console.warn('workLoop 发生错误', e);
+			}
 			workInProgress = null;
 		}
 	} while (true);

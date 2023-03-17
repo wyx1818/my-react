@@ -69,6 +69,7 @@ export const creatWorkInProgress = (
 	current: FiberNode,
 	pendingProps: Props
 ): FiberNode => {
+	// 双缓存机制，传入 current，返回 alternate
 	let wip = current.alternate;
 
 	// 首屏渲染
@@ -82,6 +83,7 @@ export const creatWorkInProgress = (
 	} else {
 		// update
 		wip.pendingProps = pendingProps;
+		// 清除上次的副作用
 		wip.flags = NoFlags;
 	}
 
