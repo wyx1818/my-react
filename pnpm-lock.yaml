@@ -7,12 +7,12 @@ importers:
       '@commitlint/cli': ^17.4.4
       '@commitlint/config-conventional': ^17.4.4
       '@rollup/plugin-commonjs': ^24.0.1
+      '@rollup/plugin-replace': ^5.0.2
       '@typescript-eslint/eslint-plugin': ^5.54.0
       '@typescript-eslint/parser': ^5.54.0
       commitlint: ^17.4.4
       eslint: ^8.35.0
       eslint-config-prettier: ^8.6.0
-      eslint-plugin,: link:@typescript-eslint/eslint-plugin,
       eslint-plugin-prettier: ^4.2.1
       husky: ^8.0.3
       prettier: ^2.8.4
@@ -25,12 +25,12 @@ importers:
       '@commitlint/cli': 17.4.4
       '@commitlint/config-conventional': 17.4.4
       '@rollup/plugin-commonjs': 24.0.1_rollup@3.18.0
+      '@rollup/plugin-replace': 5.0.2_rollup@3.18.0
       '@typescript-eslint/eslint-plugin': 5.54.0_6mj2wypvdnknez7kws2nfdgupi
       '@typescript-eslint/parser': 5.54.0_ycpbpc6yetojsgtrx3mwntkhsu
       commitlint: 17.4.4
       eslint: 8.35.0
       eslint-config-prettier: 8.6.0_eslint@8.35.0
-      eslint-plugin,: link:@typescript-eslint/eslint-plugin,
       eslint-plugin-prettier: 4.2.1_u2zha4kiojzs42thzpgwygphmy
       husky: 8.0.3
       prettier: 2.8.4
@@ -346,6 +346,20 @@ packages:
       estree-walker: 2.0.2
       glob: 8.1.0
       is-reference: 1.2.1
+      magic-string: 0.27.0
+      rollup: 3.18.0
+    dev: true
+
+  /@rollup/plugin-replace/5.0.2_rollup@3.18.0:
+    resolution: {integrity: sha512-M9YXNekv/C/iHHK+cvORzfRYfPbq0RDD8r0G+bMiTXjNGKulPnCT9O3Ss46WfhI6ZOCgApOP7xAdmCQJ+U2LAA==}
+    engines: {node: '>=14.0.0'}
+    peerDependencies:
+      rollup: ^1.20.0||^2.0.0||^3.0.0
+    peerDependenciesMeta:
+      rollup:
+        optional: true
+    dependencies:
+      '@rollup/pluginutils': 5.0.2_rollup@3.18.0
       magic-string: 0.27.0
       rollup: 3.18.0
     dev: true
