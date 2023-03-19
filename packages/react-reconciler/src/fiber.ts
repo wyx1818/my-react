@@ -22,6 +22,7 @@ export class FiberNode {
 	// 切换 current 树和 workInProgress 树
 	alternate: FiberNode | null;
 	flags: Flags;
+	subtreeFlags: Flags;
 	updateQueue: unknown;
 
 	constructor(tag: WorkTag, pendingProps: Props, key: Key) {
@@ -48,6 +49,7 @@ export class FiberNode {
 		this.alternate = null;
 		// 副作用
 		this.flags = NoFlags;
+		this.subtreeFlags = NoFlags;
 	}
 }
 
@@ -85,6 +87,7 @@ export const creatWorkInProgress = (
 		wip.pendingProps = pendingProps;
 		// 清除上次的副作用
 		wip.flags = NoFlags;
+		wip.subtreeFlags = NoFlags;
 	}
 
 	// 共用属性
