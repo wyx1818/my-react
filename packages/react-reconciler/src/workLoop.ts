@@ -3,6 +3,7 @@ import { beginWork } from './beginWork';
 import { completeWork } from './completeWork';
 import { HostRoot } from './workTags';
 import { MutationMask, NoFlags } from './fiberFlags';
+import { commitMutationEffects } from './commitWork';
 
 // 全局指针，执行正在工作的 FiberNode
 let workInProgress: FiberNode | null = null;
@@ -86,6 +87,8 @@ function commitRoot(root: FiberRootNode) {
 	if (subtreeHasEffect || rootHasEffect) {
 		// beforeMutation
 		// mutation Placement
+		commitMutationEffects(finishedWork);
+
 		root.current = finishedWork;
 		// layout
 	} else {
