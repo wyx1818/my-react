@@ -17,6 +17,10 @@ export class FiberNode {
 
 	pendingProps: Props;
 	memoizedProps: Props;
+	/**
+	 * HostComponent 指向 DOM 元素
+	 * FunctionComponent 指向 hooks 链表
+	 */
 	memoizedState: any;
 
 	// 切换 current 树和 workInProgress 树
