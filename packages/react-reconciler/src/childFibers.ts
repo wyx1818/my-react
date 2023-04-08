@@ -1,7 +1,7 @@
 import { createFiberFromElement, FiberNode } from './fiber';
 import { ReactElementType } from 'shared/ReactTypes';
 import { React_ELEMENT_TYPE } from 'shared/ReactSymbols';
-import { HostRoot } from './workTags';
+import { HostText } from './workTags';
 import { Placement } from './fiberFlags';
 
 function ChildReconciler(shouldTrackEffect: boolean) {
@@ -22,7 +22,7 @@ function ChildReconciler(shouldTrackEffect: boolean) {
 		currentFiber: FiberNode | null,
 		content: string | number
 	) {
-		const fiber = new FiberNode(HostRoot, { content }, null);
+		const fiber = new FiberNode(HostText, { content }, null);
 		fiber.return = returnFiber;
 
 		return fiber;
@@ -73,7 +73,7 @@ function ChildReconciler(shouldTrackEffect: boolean) {
 		}
 
 		if (__DEV__) {
-			console.warn('为实现的reconcile类型', newChild);
+			console.warn('未实现的reconcile类型', newChild);
 		}
 
 		return null;

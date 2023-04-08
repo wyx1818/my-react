@@ -10,7 +10,7 @@ import { mountChildFibers, reconcileChildFibers } from './childFibers';
  *
  * 计算状态的最新值
  * 创造子fiberNode
- * @param fiber
+ * @param wip
  */
 export function beginWork(wip: FiberNode): FiberNode | null {
 	// 比较，返回子 fiberNode
@@ -24,7 +24,7 @@ export function beginWork(wip: FiberNode): FiberNode | null {
 
 		default:
 			if (__DEV__) {
-				console.warn('beginWork 为实现的类型');
+				console.warn('beginWork 未实现的类型', wip);
 			}
 			return null;
 	}

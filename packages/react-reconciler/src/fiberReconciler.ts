@@ -15,18 +15,17 @@ import { scheduleUpdateOnFiber } from './workLoop';
  * @param container 宿主容器
  */
 export function createContainer(container: Container) {
-	// 创建 hostRootFiber
-	const hostRootFiber = new FiberNode(HostRoot, {}, null);
-	// 链接 fiberRootNode 和 hostRootFiber
-	const root = new FiberRootNode(container, hostRootFiber);
 	/**
 	 *      fiberRootNode
 	 *  current ↓ ↑ stateNode
 	 *     hostRootFiber
 	 */
-	hostRootFiber.updateQueue = createUpdateQueue();
+	// 创建 hostRootFiber
+	const hostRootFiber = new FiberNode(HostRoot, {}, null);
+	// 链接 fiberRootNode 和 hostRootFiber
+	const root = new FiberRootNode(container, hostRootFiber);
 
-	scheduleUpdateOnFiber(hostRootFiber);
+	hostRootFiber.updateQueue = createUpdateQueue();
 
 	return root;
 }
