@@ -1,6 +1,11 @@
 // 递归中的归
 import { FiberNode } from './fiber';
-import { HostComponent, HostRoot, HostText } from './workTags';
+import {
+	FunctionComponent,
+	HostComponent,
+	HostRoot,
+	HostText
+} from './workTags';
 import {
 	appendInitialChild,
 	Container,
@@ -11,7 +16,7 @@ import { NoFlags } from './fiberFlags';
 
 /**
  * 向上归的过程
- * @param fiber
+ * @param wip
  */
 export function completeWork(wip: FiberNode): FiberNode | null {
 	const newProps = wip.pendingProps;
@@ -49,7 +54,10 @@ export function completeWork(wip: FiberNode): FiberNode | null {
 			bubbleProperties(wip);
 
 			return null;
+		case FunctionComponent:
+			bubbleProperties(wip);
 
+			return null;
 		default:
 			if (__DEV__) {
 				console.warn('未实现的completeWork情况', wip);
