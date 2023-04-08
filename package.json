@@ -6,10 +6,11 @@
   "scripts": {
     "lint": "eslint --ext .js,.ts,.jsx,.tsx --fix --quiet ./packages",
     "build:dev": "rimraf dist && rollup --bundleConfigAsCjs --config scripts/rollup/dev.config.js -m",
-    "demo": "vite serve demos/test-fc --config scripts/vite/vite.config.js --force"
+    "demo": "vite serve demos/test-fc --config scripts/vite/vite.config.js --force",
+    "preinstall": "node ./scripts/preinstall.js"
   },
   "keywords": [],
-  "author": "",
+  "author": "zuiyu",
   "license": "ISC",
   "devDependencies": {
     "@commitlint/cli": "^17.4.4",
