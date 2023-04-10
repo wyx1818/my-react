@@ -69,7 +69,7 @@ importers:
         version: 4.9.5
       vite:
         specifier: ^4.2.1
-        version: 4.2.1(@types/node@18.14.6)
+        version: 4.2.1
 
   packages/react:
     dependencies:
@@ -78,10 +78,6 @@ importers:
         version: link:../shared
 
   packages/react-dom:
-    dependencies:
-      react:
-        specifier: workspace:*
-        version: link:../react
     devDependencies:
       react-reconciler:
         specifier: workspace:*
@@ -1079,7 +1075,7 @@ packages:
       '@babel/plugin-transform-react-jsx-source': 7.19.6(@babel/core@7.21.4)
       magic-string: 0.27.0
       react-refresh: 0.14.0
-      vite: 4.2.1(@types/node@18.14.6)
+      vite: 4.2.1
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -2988,7 +2984,7 @@ packages:
       spdx-expression-parse: 3.0.1
     dev: true
 
-  /vite@4.2.1(@types/node@18.14.6):
+  /vite@4.2.1:
     resolution: {integrity: sha512-7MKhqdy0ISo4wnvwtqZkjke6XN4taqQ2TBaTccLIpOKv7Vp2h4Y+NpmWCnGDeSvvn45KxvWgGyb0MkHvY1vgbg==}
     engines: {node: ^14.18.0 || >=16.0.0}
     hasBin: true
@@ -3013,7 +3009,6 @@ packages:
       terser:
         optional: true
     dependencies:
-      '@types/node': 18.14.6
       esbuild: 0.17.15
       postcss: 8.4.21
       resolve: 1.22.1
