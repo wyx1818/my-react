@@ -6,7 +6,14 @@ import { Container } from 'hostConfig';
 export class FiberNode {
 	tag: WorkTag;
 	key: Key;
+	/**
+	 * HostComponent 指 DOM 节点类型，如 div
+	 * FunctionComponent 指 函数 本身 如 <App /> 对应的原始函数
+	 */
 	type: Type;
+	/**
+	 * HostComponent 指 DOM 元素节点
+	 */
 	stateNode: any;
 	ref: Ref;
 
@@ -18,8 +25,8 @@ export class FiberNode {
 	pendingProps: Props;
 	memoizedProps: Props;
 	/**
-	 * HostComponent 指向 DOM 元素
-	 * FunctionComponent 指向 hooks 链表
+	 * HostRoot 指 FiberRootNode
+	 * FunctionComponent 指 hooks 链表
 	 */
 	memoizedState: any;
 
@@ -28,6 +35,7 @@ export class FiberNode {
 	flags: Flags;
 	subtreeFlags: Flags;
 	updateQueue: unknown;
+	deletions: FiberNode[] | null;
 
 	constructor(tag: WorkTag, pendingProps: Props, key: Key) {
 		// 实例
@@ -54,6 +62,7 @@ export class FiberNode {
 		// 副作用
 		this.flags = NoFlags;
 		this.subtreeFlags = NoFlags;
+		this.deletions = null;
 	}
 }
 
@@ -71,7 +80,7 @@ export class FiberRootNode {
 	}
 }
 
-export const creatWorkInProgress = (
+export const createWorkInProgress = (
 	current: FiberNode,
 	pendingProps: Props
 ): FiberNode => {
@@ -92,6 +101,7 @@ export const creatWorkInProgress = (
 		// 清除上次的副作用
 		wip.flags = NoFlags;
 		wip.subtreeFlags = NoFlags;
+		wip.deletions = null;
 	}
 
 	// 共用属性

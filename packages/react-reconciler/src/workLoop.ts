@@ -1,4 +1,4 @@
-import { creatWorkInProgress, FiberNode, FiberRootNode } from './fiber';
+import { createWorkInProgress, FiberNode, FiberRootNode } from './fiber';
 import { beginWork } from './beginWork';
 import { completeWork } from './completeWork';
 import { HostRoot } from './workTags';
@@ -11,7 +11,7 @@ let workInProgress: FiberNode | null = null;
 // 初始化
 function prepareRefreshStack(root: FiberRootNode) {
 	// FiberRootNode 不是一个普通的fiber，不能直接拿来做 workInProgress
-	workInProgress = creatWorkInProgress(root.current, {});
+	workInProgress = createWorkInProgress(root.current, {});
 }
 
 export function scheduleUpdateOnFiber(fiber: FiberNode) {

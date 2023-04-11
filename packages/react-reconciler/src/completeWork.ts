@@ -12,7 +12,11 @@ import {
 	createInstance,
 	createTextInstance
 } from 'hostConfig';
-import { NoFlags } from './fiberFlags';
+import { NoFlags, Update } from './fiberFlags';
+
+function markUpdate(fiber: FiberNode) {
+	fiber.flags |= Update;
+}
 
 /**
  * 向上归的过程
@@ -26,6 +30,7 @@ export function completeWork(wip: FiberNode): FiberNode | null {
 		case HostComponent:
 			if (current !== null && wip.alternate) {
 				// update
+				// TODO: 遍历对比 newProps
 			} else {
 				// 1. 构建 DOM
 				// 2. 将 DOM 插入到 DOM 树中
@@ -40,6 +45,12 @@ export function completeWork(wip: FiberNode): FiberNode | null {
 		case HostText:
 			if (current !== null && wip.alternate) {
 				// update
+				const oldText = current.memoizedProps.content;
+				const newText = newProps.content;
+
+				if (oldText !== newText) {
+					markUpdate(wip);
+				}
 			} else {
 				// 1. 构建 DOM
 				// 2. 将 DOM 插入到 DOM 树中

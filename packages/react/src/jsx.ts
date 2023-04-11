@@ -1,4 +1,4 @@
-import { React_ELEMENT_TYPE } from 'shared/ReactSymbols';
+import { REACT_ELEMENT_TYPE } from 'shared/ReactSymbols';
 import {
 	ElementType,
 	Key,
@@ -16,7 +16,7 @@ const ReactElement = function (
 	props: Props
 ): ReactElementType {
 	const element = {
-		$$typeof: React_ELEMENT_TYPE,
+		$$typeof: REACT_ELEMENT_TYPE,
 		type,
 		key,
 		ref,
@@ -31,7 +31,7 @@ export function isValidElement(object: any) {
 	return (
 		typeof object === 'object' &&
 		object !== null &&
-		object.$$typeof === React_ELEMENT_TYPE
+		object.$$typeof === REACT_ELEMENT_TYPE
 	);
 }
 

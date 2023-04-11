@@ -1,7 +1,23 @@
 import { FiberNode, FiberRootNode } from './fiber';
-import { MutationMask, NoFlags, Placement } from './fiberFlags';
-import { HostComponent, HostRoot, HostText } from './workTags';
-import { appendChildToContainer, Container } from 'hostConfig';
+import {
+	ChildDeletion,
+	MutationMask,
+	NoFlags,
+	Placement,
+	Update
+} from './fiberFlags';
+import {
+	FunctionComponent,
+	HostComponent,
+	HostRoot,
+	HostText
+} from './workTags';
+import {
+	appendChildToContainer,
+	commitUpdate,
+	Container,
+	removeChild
+} from 'hostConfig';
 
 let nextEffect: FiberNode | null = null;
 export function commitMutationEffects(finishedWork: FiberNode) {
@@ -43,9 +59,107 @@ function commitMutationEffectsOnFiber(finishedWork: FiberNode) {
 		commitPlacement(finishedWork);
 
 		finishedWork.flags &= ~Placement;
+	}
+	// flags Update
+	if ((flags & Update) !== NoFlags) {
+		commitUpdate(finishedWork);
 
-		// flags Update
-		// flags ChildDeletion
+		finishedWork.flags &= ~Update;
+	}
+	// flags ChildDeletion
+	if ((flags & ChildDeletion) !== NoFlags) {
+		const deletions = finishedWork.deletions;
+		if (deletions !== null) {
+			deletions.forEach((childToDelete) => {
+				commitDeletion(childToDelete);
+			});
+		}
+
+		finishedWork.flags &= ~ChildDeletion;
+	}
+}
+
+/**
+ * 递归子树
+ *
+ * - 对于 FC，需要处理useEffect umount执行、解绑ref
+ * - 对于 HostComponent，需要解绑ref
+ * - 对于子树的根 HostComponent，需要移除 DOM
+ * @param childToDelete
+ */
+function commitDeletion(childToDelete: FiberNode) {
+	let rootHostNode: FiberNode | null = null;
+	// 递归子树
+	commitNestedComponent(childToDelete, (unmountFiber) => {
+		switch (unmountFiber.tag) {
+			case HostComponent:
+				if (rootHostNode === null) {
+					rootHostNode = unmountFiber;
+				}
+
+				// TODO: 解绑 ref
+				return;
+			case HostText:
+				if (rootHostNode === null) {
+					rootHostNode = unmountFiber;
+				}
+				return;
+			case FunctionComponent: {
+				// TODO: useEffect unmount
+				return;
+			}
+			default:
+				if (__DEV__) {
+					console.warn('未处理的 unmount 类型', unmountFiber);
+				}
+				break;
+		}
+	});
+	// 移除 rootHostNode 的 DOM
+
+	if (rootHostNode !== null) {
+		const hostParent = getHostParent(childToDelete);
+		if (hostParent !== null) {
+			removeChild(rootHostNode, hostParent);
+		}
+	}
+
+	childToDelete.return = null;
+	childToDelete.child = null;
+}
+
+function commitNestedComponent(
+	root: FiberNode,
+	onCommitUnmount: (fiber: FiberNode) => void
+) {
+	let node = root;
+	while (true) {
+		onCommitUnmount(node);
+
+		if (node.child !== null) {
+			// 向下遍历的过程
+			node.child.return = node;
+			node = node.child;
+			continue;
+		}
+
+		if (node === root) {
+			// 终止条件
+			return;
+		}
+
+		while (node.sibling === null) {
+			// 处理兄弟节点
+			if (node.return === null || node.return == root) {
+				return;
+			}
+
+			// 向上归
+			node = node.return;
+		}
+
+		node.sibling.return = node.return;
+		node = node.sibling;
 	}
 }
 
