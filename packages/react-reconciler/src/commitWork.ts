@@ -88,6 +88,10 @@ function commitMutationEffectsOnFiber(finishedWork: FiberNode) {
  * @param childToDelete
  */
 function commitDeletion(childToDelete: FiberNode) {
+	if (__DEV__) {
+		console.warn('执行 ChildDeletion 操作', childToDelete);
+	}
+
 	let rootHostNode: FiberNode | null = null;
 	// 递归子树
 	commitNestedComponent(childToDelete, (unmountFiber) => {
@@ -120,7 +124,7 @@ function commitDeletion(childToDelete: FiberNode) {
 	if (rootHostNode !== null) {
 		const hostParent = getHostParent(childToDelete);
 		if (hostParent !== null) {
-			removeChild(rootHostNode, hostParent);
+			removeChild((rootHostNode as FiberNode).stateNode, hostParent);
 		}
 	}
 

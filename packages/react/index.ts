@@ -1,4 +1,4 @@
-import { jsxDEV, jsx, isValidElement as isValidElementFn } from './src/jsx';
+import { jsx, isValidElement as isValidElementFn } from './src/jsx';
 import currentDispatcher, {
 	Dispatcher,
 	resolveDispatcher

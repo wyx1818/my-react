@@ -6,7 +6,6 @@ export type Container = Element;
 export type Instance = Element;
 export type TextInstance = Text;
 
-// export const createInstance = (type: string, props: any): Instance => {
 export const createInstance = (type: string): Instance => {
 	// TODO: 处理Props
 	const element = document.createElement(type);
