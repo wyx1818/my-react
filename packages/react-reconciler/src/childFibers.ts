@@ -286,7 +286,7 @@ function ChildReconciler(shouldTrackEffect: boolean) {
 					);
 				default:
 					if (__DEV__) {
-						console.warn('为实现的reconcile类型', newChild);
+						console.warn('未实现的reconcile类型', newChild);
 					}
 					break;
 			}
