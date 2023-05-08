@@ -1,6 +1,7 @@
 // 递归过程中的递阶段
 import { FiberNode } from './fiber';
 import {
+	Fragment,
 	FunctionComponent,
 	HostComponent,
 	HostRoot,
@@ -29,6 +30,8 @@ export function beginWork(wip: FiberNode): FiberNode | null {
 			return null;
 		case FunctionComponent:
 			return updateFunctionComponent(wip);
+		case Fragment:
+			return updateFragment(wip);
 		default:
 			if (__DEV__) {
 				console.warn('beginWork 未实现的类型', wip);
@@ -61,6 +64,13 @@ function updateHostComponent(wip: FiberNode) {
 
 function updateFunctionComponent(wip: FiberNode) {
 	const nextChildren = renderWithHooks(wip);
+	reconcileChildren(wip, nextChildren);
+
+	return wip.child;
+}
+
+function updateFragment(wip: FiberNode) {
+	const nextChildren = wip.pendingProps;
 	reconcileChildren(wip, nextChildren);
 
 	return wip.child;
