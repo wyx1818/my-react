@@ -6,6 +6,7 @@ import { Dispatch } from 'react/src/currentDispatcher';
  */
 export interface Update<State> {
 	action: Action<State>;
+	next: Update<any> | null;
 }
 
 /**
@@ -25,7 +26,8 @@ export interface UpdateQueue<State> {
  */
 export const createUpdate = <State>(action: Action<State>): Update<State> => {
 	return {
-		action
+		action,
+		next: null
 	};
 };
 
@@ -51,6 +53,25 @@ export const enqueueUpdate = <State>(
 	updateQueue: UpdateQueue<State>,
 	update: Update<State>
 ) => {
+	// 批处理，更改为环状链表结构
+	// 表头的 next 指向第一个更新
+	// 当表尾的 next 指向表头时，完成批处理
+	const pending = updateQueue.shared.pending;
+
+	if (pending === null) {
+		// step1 a -> a
+		update.next = update;
+	} else {
+		// 新状态的next 指向之前的开头
+		// step2 b -> a -> a
+		// step3 c -> a -> b -> a
+		update.next = pending.next;
+		// 并将开头更新未新状态
+		// step2 b -> a -> b
+		// step3 c -> a -> b -> c
+		pending.next = update;
+	}
+
 	updateQueue.shared.pending = update;
 };
 
