@@ -1,6 +1,7 @@
 // 递归中的归
 import { FiberNode } from './fiber';
 import {
+	Fragment,
 	FunctionComponent,
 	HostComponent,
 	HostRoot,
@@ -66,10 +67,8 @@ export function completeWork(wip: FiberNode): FiberNode | null {
 
 			return null;
 		case HostRoot:
-			bubbleProperties(wip);
-
-			return null;
 		case FunctionComponent:
+		case Fragment:
 			bubbleProperties(wip);
 
 			return null;
