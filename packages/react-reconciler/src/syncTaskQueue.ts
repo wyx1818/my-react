@@ -24,6 +24,7 @@ export function flushSyncCallBacks() {
 			}
 		} finally {
 			isFlushingSyncQueue = false;
+			syncQueue = [];
 		}
 	}
 }
