@@ -16,6 +16,8 @@ function App() {
 
 	const handleClick = () => {
 		setNumber((pre) => pre + 1);
+		setNumber((pre) => pre + 1);
+		setNumber((pre) => pre + 1);
 	};
 
 	return (
