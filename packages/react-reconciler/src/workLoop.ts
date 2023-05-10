@@ -7,6 +7,7 @@ import { commitMutationEffects } from './commitWork';
 import {
 	getHighestPriorityLane,
 	Lane,
+	markRootFinished,
 	mergeLanes,
 	NoLane,
 	SyncLane
@@ -16,11 +17,14 @@ import { scheduleMicroTask } from 'hostConfig';
 
 // 全局指针，执行正在工作的 FiberNode
 let workInProgress: FiberNode | null = null;
+let wipRootRenderLane: Lane = NoLane;
 
 // 初始化
-function prepareRefreshStack(root: FiberRootNode) {
+function prepareFreshStack(root: FiberRootNode, lane: Lane) {
 	// FiberRootNode 不是一个普通的fiber，不能直接拿来做 workInProgress
 	workInProgress = createWorkInProgress(root.current, {});
+
+	wipRootRenderLane = lane;
 }
 
 export function scheduleUpdateOnFiber(fiber: FiberNode, lane: Lane) {
@@ -42,7 +46,7 @@ function ensureRootIsScheduled(root: FiberRootNode) {
 	if (updateLane === SyncLane) {
 		// 同步优先级，用微任务调度
 		if (__DEV__) {
-			console.log('在微任务中国呢调度，优先级', updateLane);
+			console.log('在微任务中调度，优先级', updateLane);
 		}
 
 		scheduleSyncCallback(performSyncWorkOnRoot.bind(null, root, updateLane));
@@ -88,8 +92,12 @@ function performSyncWorkOnRoot(root: FiberRootNode, lane: Lane) {
 		return;
 	}
 
+	if (__DEV__) {
+		console.warn('render 阶段开始');
+	}
+
 	// 初始化
-	prepareRefreshStack(root);
+	prepareFreshStack(root, nextLane);
 
 	do {
 		try {
@@ -103,8 +111,12 @@ function performSyncWorkOnRoot(root: FiberRootNode, lane: Lane) {
 		}
 	} while (true);
 
+	// 结束阶段
 	const finishedWork = root.current.alternate;
 	root.finishedWork = finishedWork;
+	root.finishedLane = lane;
+	wipRootRenderLane = NoLane;
+
 	// wip fiberNode树 树中的flags
 	commitRoot(root);
 }
@@ -120,9 +132,17 @@ function commitRoot(root: FiberRootNode) {
 	if (__DEV__) {
 		console.warn('commit 阶段开始', finishedWork);
 	}
+	const lane = root.finishedLane;
+
+	if (lane === NoLane && __DEV__) {
+		console.error('commit 阶段 finishedLane 不应该是 NoLane');
+	}
 
 	// 重置
 	root.finishedWork = null;
+	root.finishedLane = NoLane;
+
+	markRootFinished(root, lane);
 
 	// 判断是否存在3个子阶段需要执行的操作
 	// root subTreeFlags 和 root flags
@@ -149,7 +169,7 @@ function workLoop() {
 
 function performUnitOfWork(fiber: FiberNode) {
 	// 子 fiber 或者 null
-	const next = beginWork(fiber);
+	const next = beginWork(fiber, wipRootRenderLane);
 	fiber.memoizedProps = fiber.pendingProps;
 
 	if (next === null) {
