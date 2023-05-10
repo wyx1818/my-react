@@ -1,11 +1,13 @@
 import { Action } from 'shared/ReactTypes';
 import { Dispatch } from 'react/src/currentDispatcher';
+import { Lane } from './fiberLanes';
 
 /**
  * 代表更新的数据结构
  */
 export interface Update<State> {
 	action: Action<State>;
+	lane: Lane;
 	next: Update<any> | null;
 }
 
@@ -23,10 +25,15 @@ export interface UpdateQueue<State> {
 /**
  * 创建更新实例
  * @param action
+ * @param lane 优先级
  */
-export const createUpdate = <State>(action: Action<State>): Update<State> => {
+export const createUpdate = <State>(
+	action: Action<State>,
+	lane: Lane
+): Update<State> => {
 	return {
 		action,
+		lane,
 		next: null
 	};
 };
@@ -62,11 +69,11 @@ export const enqueueUpdate = <State>(
 		// step1 a -> a
 		update.next = update;
 	} else {
-		// 新状态的next 指向之前的开头
+		// 新状态的 next 指向表头（第一个节点）
 		// step2 b -> a -> a
 		// step3 c -> a -> b -> a
 		update.next = pending.next;
-		// 并将开头更新未新状态
+		// 表尾指向新状态
 		// step2 b -> a -> b
 		// step3 c -> a -> b -> c
 		pending.next = update;
