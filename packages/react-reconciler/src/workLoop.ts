@@ -33,7 +33,8 @@ import { HookHasEffect, Passive } from './hookEffectTags';
 // 全局指针，执行正在工作的 FiberNode
 let workInProgress: FiberNode | null = null;
 let wipRootRenderLane: Lane = NoLane;
-let rootDoesHasPassiveEffects: boolean = false;
+
+let rootDoesHasPassiveEffects = false;
 
 // 初始化
 function prepareFreshStack(root: FiberRootNode, lane: Lane) {
@@ -181,8 +182,9 @@ function commitRoot(root: FiberRootNode) {
 	// 判断是否存在3个子阶段需要执行的操作
 	// root subTreeFlags 和 root flags
 	const subtreeHasEffect =
-		(finishedWork.subtreeFlags & MutationMask) !== NoFlags;
-	const rootHasEffect = (finishedWork.flags & MutationMask) !== NoFlags;
+		(finishedWork.subtreeFlags & (MutationMask | PassiveMask)) !== NoFlags;
+	const rootHasEffect =
+		(finishedWork.flags & (MutationMask | PassiveMask)) !== NoFlags;
 
 	if (subtreeHasEffect || rootHasEffect) {
 		// beforeMutation
