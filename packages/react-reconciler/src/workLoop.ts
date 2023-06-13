@@ -33,6 +33,7 @@ import { HookHasEffect, Passive } from './hookEffectTags';
 // 全局指针，执行正在工作的 FiberNode
 let workInProgress: FiberNode | null = null;
 let wipRootRenderLane: Lane = NoLane;
+
 let rootDoesHasPassiveEffects = false;
 
 // 初始化
