@@ -1,0 +1,11 @@
+{
+  "name": "scheduler",
+  "version": "1.0.0",
+  "description": "react scheduler 调度器",
+  "module": "index.ts",
+  "keywords": [],
+  "author": "zuiyu",
+  "license": "ISC",
+  "dependencies": {
+  }
+}
