@@ -7,7 +7,7 @@ import { getCurrentTime, isFn, isObject } from './shared';
 import { peek, pop, push } from './SchedulerMinHeap';
 
 type Callback = (...arg: any[]) => void | Callback; // (args: any) => void | any;
-
+type HostCallback = typeof flushWork;
 export interface Task {
 	id: number;
 	callback: Callback | null;
@@ -38,6 +38,13 @@ let isHostTimeoutScheduled = false;
 let isHostCallbackScheduled = false;
 /** 是否在执行具体的 work，防止重复进入 */
 let isPerformingWork = false;
+
+/** 执行任务直到过期时间 */
+let schedulePerformWorkUntilDeadline: Function;
+
+let isMessageLoopRunning = false;
+/** 执行完了就会没，所以不能直接写为 flushWork */
+let scheduledHostCallback: HostCallback | null = null;
 
 let taskTimeoutID = -1;
 
@@ -106,13 +113,51 @@ function handleTimeout(currentTime: number) {
 }
 
 /**
- * TODO: 调度主线程任务
- * @param callbak
+ * 模拟 DOM 的 requestIdleCallback，在浏览器有空闲时机的时候做某些事情
+ * @param callback
  */
-function requestHostCallback(callbak: Callback) {}
+function requestHostCallback(callback: HostCallback) {
+	scheduledHostCallback = callback;
+
+	if (!isMessageLoopRunning) {
+		isMessageLoopRunning = true;
+		schedulePerformWorkUntilDeadline();
+	}
+}
+
+const performWorkUntilDeadline = () => {
+	if (scheduledHostCallback !== null) {
+		const currentTime = getCurrentTime();
+		const hasTimeRemaining = true;
+		let hasMoreWork = true;
+
+		try {
+			hasMoreWork = scheduledHostCallback(hasTimeRemaining, currentTime);
+		} finally {
+			if (hasMoreWork) {
+				// TODO
+			} else {
+				isMessageLoopRunning = false;
+				scheduledHostCallback = null;
+			}
+		}
+	} else {
+		isMessageLoopRunning = false;
+	}
+};
 
 /**
- * TODO
+ * 模拟宏任务，如果没有的话，回退到 setTimeout
+ */
+const channel = new MessageChannel();
+const port = channel.port2;
+channel.port1.onmessage = performWorkUntilDeadline;
+
+schedulePerformWorkUntilDeadline = () => {
+	port.postMessage(null);
+};
+
+/**
  * 随着 requestHostCallback 的调用而调用
  */
 function flushWork(hasTimeRemaining: boolean, initialTime: number) {
@@ -142,8 +187,11 @@ function flushWork(hasTimeRemaining: boolean, initialTime: number) {
 
 /**
  * 在当前时间切片内循环执行任务
+ *
+ * 在一个切片内，可能执行多个任务
  * @param hasTimeRemaining 是否还有剩余时间
  * @param initialTime 当前时间（理论时间）
+ * @return 还有没有其他任务
  */
 function workLoop(hasTimeRemaining: boolean, initialTime: number) {
 	let currentTime = initialTime;
