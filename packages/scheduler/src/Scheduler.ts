@@ -1,5 +1,6 @@
 import {
 	getTimeoutByPriorityLevel,
+	NormalPriority,
 	PriorityLevel
 } from './SchedulerPriorities';
 import { getCurrentTime, isFn, isObject } from './shared';
@@ -27,18 +28,32 @@ let taskIdCounter = 1;
 
 /** 全局变量，可能会被其他任务打断 */
 let currentTask: Task | null = null;
+/** 当前任务的优先级 */
+let currentPriorityLevel = NormalPriority;
 
-/** 是否在倒计时标记 */
+/** 是否有任务在倒计时 */
 let isHostTimeoutScheduled = false;
-/** 在调度任务 */
+
+/** 是否在调度任务 */
 let isHostCallbackScheduled = false;
+/** 是否在执行具体的 work，防止重复进入 */
+let isPerformingWork = false;
 
 let taskTimeoutID = -1;
 
+/**
+ * 取消在倒计时的任务
+ */
 function cancelHostTimeout() {
 	clearTimeout(taskTimeoutID);
 	taskTimeoutID = -1;
 }
+
+/**
+ * 对任务进行倒计时
+ * @param callback 待执行的任务
+ * @param ms 差异时间
+ */
 function requestHostTimeout(callback: Callback, ms: number) {
 	taskTimeoutID = setTimeout(() => {
 		callback(getCurrentTime());
@@ -47,7 +62,7 @@ function requestHostTimeout(callback: Callback, ms: number) {
 
 /**
  * 检查 timerQueue 中是否有任务到期，到期了就把当前有效任务移动到 taskQueue 中
- * @params currentTime 当前时间
+ * @param currentTime 当前时间
  */
 function advanceTimers(currentTime: number) {
 	let timer: Task = peek(timerQueue) as Task;
@@ -77,7 +92,7 @@ function handleTimeout(currentTime: number) {
 
 	if (!isHostCallbackScheduled) {
 		if (peek(taskQueue) !== null) {
-			// 有任务，开始调度
+			// taskQueue 有任务，开始调度
 			isHostCallbackScheduled = true;
 			requestHostCallback(flushWork);
 		} else {
@@ -98,8 +113,32 @@ function requestHostCallback(callbak: Callback) {}
 
 /**
  * TODO
+ * 随着 requestHostCallback 的调用而调用
  */
-function flushWork() {}
+function flushWork(hasTimeRemaining: boolean, initialTime: number) {
+	isHostCallbackScheduled = false;
+
+	// 开始执行任务了，将其他倒计时的任务取消掉
+	if (isHostTimeoutScheduled) {
+		isHostTimeoutScheduled = false;
+		cancelHostTimeout();
+	}
+	isPerformingWork = true;
+
+	/** 记录上一次任务的优先级 */
+	const previousPriorityLevel = currentPriorityLevel;
+	try {
+		return workLoop(hasTimeRemaining, initialTime);
+	} finally {
+		// 执行完毕后
+		// 清空任务
+		currentTask = null;
+		// 恢复优先级
+		currentPriorityLevel = previousPriorityLevel;
+		// 标记无执行中的 work 了
+		isPerformingWork = false;
+	}
+}
 
 /**
  * 在当前时间切片内循环执行任务
@@ -118,6 +157,7 @@ function workLoop(hasTimeRemaining: boolean, initialTime: number) {
 		}
 
 		const callback = currentTask.callback;
+		currentPriorityLevel = currentTask.priorityLevel; // 在scheduleCallback中加入的
 		if (isFn(callback)) {
 			// 将 callback 滞空，防止其他地方调用
 			currentTask.callback = null;
@@ -146,6 +186,19 @@ function workLoop(hasTimeRemaining: boolean, initialTime: number) {
 		}
 
 		currentTask = peek(taskQueue) as Task;
+	}
+
+	// 判断还有没有其他的任务，因为在 while 循环中，有 break 情况
+	if (currentTask !== null) {
+		return true;
+	} else {
+		// taskQueue 中没有了任务，检查 timerQueue
+		const firstTimer = peek(timerQueue) as Task;
+		if (firstTimer !== null) {
+			// 如果timerQueue 中有任务
+			requestHostTimeout(handleTimeout, firstTimer.startTime - currentTime);
+		}
+		return false;
 	}
 }
 
@@ -191,5 +244,11 @@ export function scheduleCallback(
 	} else {
 		newTask.sortIndex = expirationTime;
 		push(taskQueue, newTask);
+
+		// 没有延迟任务，检查是否有任务正在调度
+		if (!isHostCallbackScheduled && !isPerformingWork) {
+			isHostCallbackScheduled = true;
+			requestHostCallback(flushWork);
+		}
 	}
 }
